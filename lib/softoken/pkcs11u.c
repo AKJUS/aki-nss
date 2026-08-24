@@ -2281,12 +2281,15 @@ sftk_ClearSession(SFTKSession *session)
     PR_DestroyLock(session->objectLock);
     if (session->enc_context) {
         sftk_FreeContext(session->enc_context);
+        session->enc_context = NULL;
     }
     if (session->hash_context) {
         sftk_FreeContext(session->hash_context);
+        session->hash_context = NULL;
     }
     if (session->search) {
         sftk_FreeSearch(session->search);
+        session->search = NULL;
     }
 }
 

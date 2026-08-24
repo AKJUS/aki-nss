@@ -14480,11 +14480,11 @@ void
 ssl3_DestroySSL3Info(sslSocket *ss)
 {
 
-    if (ss->ssl3.clientCertificate != NULL)
-        CERT_DestroyCertificate(ss->ssl3.clientCertificate);
+    CERT_DestroyCertificate(ss->ssl3.clientCertificate);
+    ss->ssl3.clientCertificate = NULL;
 
-    if (ss->ssl3.clientPrivateKey != NULL)
-        SECKEY_DestroyPrivateKey(ss->ssl3.clientPrivateKey);
+    SECKEY_DestroyPrivateKey(ss->ssl3.clientPrivateKey);
+    ss->ssl3.clientPrivateKey = NULL;
 
     if (ss->ssl3.hs.clientAuthSignatureSchemes != NULL) {
         PORT_Free(ss->ssl3.hs.clientAuthSignatureSchemes);
@@ -14501,20 +14501,25 @@ ssl3_DestroySSL3Info(sslSocket *ss)
     }
     if (ss->ssl3.ca_list) {
         CERT_FreeDistNames(ss->ssl3.ca_list);
+        ss->ssl3.ca_list = NULL;
     }
 
     /* clean up handshake */
     if (ss->ssl3.hs.md5) {
         PK11_DestroyContext(ss->ssl3.hs.md5, PR_TRUE);
+        ss->ssl3.hs.md5 = NULL;
     }
     if (ss->ssl3.hs.sha) {
         PK11_DestroyContext(ss->ssl3.hs.sha, PR_TRUE);
+        ss->ssl3.hs.sha = NULL;
     }
     if (ss->ssl3.hs.shaEchInner) {
         PK11_DestroyContext(ss->ssl3.hs.shaEchInner, PR_TRUE);
+        ss->ssl3.hs.shaEchInner = NULL;
     }
     if (ss->ssl3.hs.shaPostHandshake) {
         PK11_DestroyContext(ss->ssl3.hs.shaPostHandshake, PR_TRUE);
+        ss->ssl3.hs.shaPostHandshake = NULL;
     }
     if (ss->ssl3.hs.messages.buf) {
         sslBuffer_Clear(&ss->ssl3.hs.messages);
@@ -14528,6 +14533,7 @@ ssl3_DestroySSL3Info(sslSocket *ss)
 
     /* free the SSL3Buffer (msg_body) */
     PORT_Free(ss->ssl3.hs.msg_body.buf);
+    ss->ssl3.hs.msg_body.buf = NULL;
 
     SECITEM_FreeItem(&ss->ssl3.hs.newSessionTicket.ticket, PR_FALSE);
     SECITEM_FreeItem(&ss->ssl3.hs.srvVirtName, PR_FALSE);
@@ -14551,26 +14557,26 @@ ssl3_DestroySSL3Info(sslSocket *ss)
     ssl_DestroyCipherSpecs(&ss->ssl3.hs.cipherSpecs);
 
     /* Destroy TLS 1.3 keys */
-    if (ss->ssl3.hs.currentSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.currentSecret);
-    if (ss->ssl3.hs.resumptionMasterSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.resumptionMasterSecret);
-    if (ss->ssl3.hs.dheSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.dheSecret);
-    if (ss->ssl3.hs.clientEarlyTrafficSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.clientEarlyTrafficSecret);
-    if (ss->ssl3.hs.clientHsTrafficSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.clientHsTrafficSecret);
-    if (ss->ssl3.hs.serverHsTrafficSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.serverHsTrafficSecret);
-    if (ss->ssl3.hs.clientTrafficSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.clientTrafficSecret);
-    if (ss->ssl3.hs.serverTrafficSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.serverTrafficSecret);
-    if (ss->ssl3.hs.earlyExporterSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.earlyExporterSecret);
-    if (ss->ssl3.hs.exporterSecret)
-        PK11_FreeSymKey(ss->ssl3.hs.exporterSecret);
+    PK11_FreeSymKey(ss->ssl3.hs.currentSecret);
+    ss->ssl3.hs.currentSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.resumptionMasterSecret);
+    ss->ssl3.hs.resumptionMasterSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.dheSecret);
+    ss->ssl3.hs.dheSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.clientEarlyTrafficSecret);
+    ss->ssl3.hs.clientEarlyTrafficSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.clientHsTrafficSecret);
+    ss->ssl3.hs.clientHsTrafficSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.serverHsTrafficSecret);
+    ss->ssl3.hs.serverHsTrafficSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.clientTrafficSecret);
+    ss->ssl3.hs.clientTrafficSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.serverTrafficSecret);
+    ss->ssl3.hs.serverTrafficSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.earlyExporterSecret);
+    ss->ssl3.hs.earlyExporterSecret = NULL;
+    PK11_FreeSymKey(ss->ssl3.hs.exporterSecret);
+    ss->ssl3.hs.exporterSecret = NULL;
 
     ss->ssl3.hs.zeroRttState = ssl_0rtt_none;
     /* Destroy TLS 1.3 buffered early data. */
@@ -14581,7 +14587,9 @@ ssl3_DestroySSL3Info(sslSocket *ss)
 
     /* TLS 1.3 ECH state. */
     PK11_HPKE_DestroyContext(ss->ssl3.hs.echHpkeCtx, PR_TRUE);
+    ss->ssl3.hs.echHpkeCtx = NULL;
     PORT_Free((void *)ss->ssl3.hs.echPublicName); /* CONST */
+    ss->ssl3.hs.echPublicName = NULL;
     sslBuffer_Clear(&ss->ssl3.hs.greaseEchBuf);
 
     /* TLS 1.3 GREASE (client) state. */
