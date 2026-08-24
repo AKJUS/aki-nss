@@ -14085,6 +14085,11 @@ ssl3_HandleRecord(sslSocket *ss, SSL3Ciphertext *cText)
             return tls13_HandleEarlyApplicationData(ss, plaintext);
         }
         plaintext->len = 0;
+        /* DTLS 1.2 [RFC 6347, Section 4.1.2.7] and DTLS 1.3 [RFC 9147,
+         * Section 4.5.2]: invalid records SHOULD be silently discarded. */
+        if (IS_DTLS(ss)) {
+            return SECSuccess;
+        }
         (void)SSL3_SendAlert(ss, alert_fatal, unexpected_message);
         PORT_SetError(SSL_ERROR_RX_UNEXPECTED_APPLICATION_DATA);
         return SECFailure;

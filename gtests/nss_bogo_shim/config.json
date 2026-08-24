@@ -143,12 +143,6 @@
         "DTLS13RecordHeader-CIDBit":"NSS sends a fatal alert on a record with the Connection ID bit set (NSS doesn't implement RFC 9146 Connection ID) instead of silently discarding it; RFC 6347 4.1.2.7 permits either.",
         "DTLS-ECH*":"NSS does not support ECH over DTLS.",
 
-        "####################":"####################",
-        "### DTLS: NSS spec deviations":"",
-        "####################":"####################",
-
-        "AppDataAfterChangeCipherSpec-DTLS*":"NSS aborts with unexpected_application_data on application data for the new epoch received before Finished; RFC 6347 4.1 requires it to discard or buffer such records.",
-
         "":""
     },
     "ErrorMap" : {
