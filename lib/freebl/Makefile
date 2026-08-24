@@ -138,7 +138,10 @@ endif
 endif
 ifeq ($(CPU_ARCH),aarch64)
     ifdef CC_IS_CLANG
-        DEFINES += -DUSE_HW_AES -DUSE_HW_SHA1 -DUSE_HW_SHA2 -DHAVE_PLATFORM_GHASH
+        DEFINES += -DUSE_HW_AES -DUSE_HW_SHA1 -DUSE_HW_SHA2
+        ifeq ($(LITTLE_ENDIAN),1)
+            DEFINES += -DHAVE_PLATFORM_GHASH
+        endif
         EXTRA_SRCS += aes-armv8.c ghash-aarch64.c sha1-armv8.c sha256-armv8.c
     else ifeq (1,$(CC_IS_GCC))
         # GCC versions older than 4.9 don't support ARM AES. The check
@@ -146,11 +149,17 @@ ifeq ($(CPU_ARCH),aarch64)
         # and then rejects any major versions prior to 5. Note that
         # there has been no GCC 4.10, as it was renamed to GCC 5.
         ifneq (,$(filter 4.9,$(word 1,$(GCC_VERSION)).$(word 2,$(GCC_VERSION))))
-            DEFINES += -DUSE_HW_AES -DUSE_HW_SHA1 -DUSE_HW_SHA2 -DHAVE_PLATFORM_GHASH
+            DEFINES += -DUSE_HW_AES -DUSE_HW_SHA1 -DUSE_HW_SHA2
+            ifeq ($(LITTLE_ENDIAN),1)
+                DEFINES += -DHAVE_PLATFORM_GHASH
+            endif
             EXTRA_SRCS += aes-armv8.c ghash-aarch64.c sha1-armv8.c sha256-armv8.c
         endif
         ifeq (,$(filter 0 1 2 3 4,$(word 1,$(GCC_VERSION))))
-            DEFINES += -DUSE_HW_AES -DUSE_HW_SHA1 -DUSE_HW_SHA2 -DHAVE_PLATFORM_GHASH
+            DEFINES += -DUSE_HW_AES -DUSE_HW_SHA1 -DUSE_HW_SHA2
+            ifeq ($(LITTLE_ENDIAN),1)
+                DEFINES += -DHAVE_PLATFORM_GHASH
+            endif
             EXTRA_SRCS += aes-armv8.c ghash-aarch64.c sha1-armv8.c sha256-armv8.c
         endif
     endif
@@ -183,7 +192,9 @@ ifeq ($(CPU_ARCH),aarch64)
 endif
 ifeq ($(CPU_ARCH),arm)
 ifndef NSS_DISABLE_ARM32_NEON
-    DEFINES += -DHAVE_PLATFORM_GHASH
+    ifeq ($(LITTLE_ENDIAN),1)
+        DEFINES += -DHAVE_PLATFORM_GHASH
+    endif
     EXTRA_SRCS += ghash-arm32-neon.c
 endif
     ifdef CC_IS_CLANG
@@ -316,7 +327,9 @@ ifeq ($(CPU_ARCH),arm)
     MPI_SRCS += mpi_arm.c
 endif
 ifeq ($(CPU_ARCH),ppc)
-    DEFINES += -DHAVE_PLATFORM_GHASH
+    ifeq ($(LITTLE_ENDIAN),1)
+        DEFINES += -DHAVE_PLATFORM_GHASH
+    endif
     EXTRA_SRCS += ghash-ppc.c
 ifdef USE_64
     DEFINES += -DNSS_NO_INIT_SUPPORT
