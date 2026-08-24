@@ -101,6 +101,7 @@
 
         "ExtensionTrailingData-ServerName-Server-DTLS-TLS1":"NSS doesn't reject trailing data after the ServerName extension in DTLS 1.0/1.2.",
         "ExtensionTrailingData-ServerName-Server-DTLS-TLS12":"NSS doesn't reject trailing data after the ServerName extension in DTLS 1.0/1.2.",
+        "UnsolicitedServerNameAck-DTLS-*":"NSS ignores unsolicited server_name acks instead of failing with unexpected_extension (DTLS variant of UnsolicitedServerNameAck-TLS*).",
         "CorruptTicket-DTLS-*":"NSS sends an alert on reception of a corrupted session ticket instead of falling back to full handshake. Bug 1783812 (DTLS variant of CorruptTicket-TLS-TLS12).",
         "Resume-Server-TLS12-TLS13-DTLS":"NSS rejects TLS 1.3 resumption over TLS 1.2 with the wrong alert (DTLS variant of Resume-Server-TLS12-TLS13-TLS).",
 
@@ -108,7 +109,20 @@
         "### DTLS: DTLS-specific tests":"",
         "####################":"####################",
 
+        "ExtensionTrailingData-ServerName-Client-DTLS-*":"NSS doesn't reject trailing data after the ServerName extension.",
+        "TrailingMessageData-HelloVerifyRequest-DTLS":"NSS doesn't reject trailing data after a HelloVerifyRequest; it only checks trailing data on key-change handshake messages, cf. TrailingData*.",
+
+        "RejectEmptyOCSPResponse-DTLS-*":"NSS doesn't reject an empty stapled OCSP response; RFC 6066 8 defines OCSPResponse<1..2^24-1> (min 1 byte).",
+
+        "DTLS13-SendExtraFinished":"NSS accepts an extra Finished (treated as a DTLS retransmit) instead of rejecting it as excess handshake data.",
+        "*SendExtraFinished-Reordered":"NSS accepts a reordered extra Finished (treated as a DTLS retransmit) instead of rejecting it as excess handshake data.",
+        "KeyUpdate-ExtraMessage*-DTLS":"NSS accepts an extra handshake message after a KeyUpdate instead of rejecting it as excess handshake data.",
+
+        "AppDataBeforeHandshake-DTLS*":"NSS silently discards application data received before the handshake completes instead of failing with unexpected_record; RFC 6347 4.1.2.7.",
+        "SendSplitAlert-Sync":"NSS drops the split alert, stays mid-handshake awaiting the server, and BoGo resets the connection before NSS retransmits.",
+
         "TLS13-HelloRetryRequest-Server-DTLS-Sync*":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
+        "ClientAuth-*-TLS13-DTLS-Sync*":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
         "VersionNegotiation-Server*-TLS13-TLS13-DTLS":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
         "VersionNegotiationExtension-TLS13-DTLS":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
         "MinimumVersion-Server*-TLS13-DTLS":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
@@ -117,7 +131,23 @@
         "DTLS13RecordHeader-NoLength-Server":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
         "DTLS13RecordHeader-ShortSeqNums-Server":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
         "SendEmptyFragments-Padded-DTLS":"BoGo requires tight DTLS 1.3 handshake-record packing; NSS uses one record per message (RFC 9147 permits this).",
+
+        "ReorderHandshakeFragments-Small-DTLS-*":"NSS discards out-of-order DTLS handshake messages instead of buffering them; see lib/ssl/dtlscon.c:375.",
+        "ReorderHandshakeFragments-Large-DTLS-*":"NSS discards out-of-order DTLS handshake messages instead of buffering them; see lib/ssl/dtlscon.c:375.",
+        "MixCompleteMessageWithFragments-DTLS-*":"NSS discards out-of-order DTLS handshake messages instead of buffering them; see lib/ssl/dtlscon.c:375.",
+        "DTLS13-EarlyData-DTLS-*":"NSS supports DTLS 1.3 0-RTT early data (RFC 9147; SSL_ENABLE_0RTT_DATA, ssl.h:241), which BoGo disables for DTLS 1.3 and rejects.",
+        "DTLS-Replay*TLS13":"Under record replay, NSS's DTLS 1.3 client emits an ACK during the application-data phase covering received handshake records and NewSessionTickets; RFC 9147 7 permits post-handshake ACKs that 'MAY cover more than one flight'. BoGo rejects the unexpected post-handshake ACK.",
+        "KeyUpdate-Requested-DTLS":"NSS coalesces the KeyUpdates correctly, then emits an ACK covering received handshake records during the application-data phase; RFC 9147 7 permits post-handshake ACKs that 'MAY cover more than one flight'. BoGo rejects the unexpected post-handshake ACK.",
+        "DTLS-HelloVerifyRequest-255":"NSS caps accepted HelloVerifyRequest cookies at 32 bytes (DTLS_COOKIE_BYTES); RFC 6347 4.2.1 sets the cookie size limit to 255 bytes.",
+        "DTLS13RecordHeader-OldHeader":"NSS sends a fatal alert (bad_record_mac) on a DTLS 1.3 record using the legacy plaintext header instead of silently discarding it; RFC 6347 4.1.2.7 permits either.",
+        "DTLS13RecordHeader-CIDBit":"NSS sends a fatal alert on a record with the Connection ID bit set (NSS doesn't implement RFC 9146 Connection ID) instead of silently discarding it; RFC 6347 4.1.2.7 permits either.",
         "DTLS-ECH*":"NSS does not support ECH over DTLS.",
+
+        "####################":"####################",
+        "### DTLS: NSS spec deviations":"",
+        "####################":"####################",
+
+        "AppDataAfterChangeCipherSpec-DTLS*":"NSS aborts with unexpected_application_data on application data for the new epoch received before Finished; RFC 6347 4.1 requires it to discard or buffer such records.",
 
         "":""
     },
