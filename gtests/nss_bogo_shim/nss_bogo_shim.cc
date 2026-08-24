@@ -1433,12 +1433,6 @@ std::unique_ptr<const Config> ReadConfig(int argc, char** argv) {
       return nullptr;
   }
 
-  // trust-cert is only wired up for DTLS here.
-  if (!cfg->get<bool>("dtls") && !cfg->get<std::string>("trust-cert").empty()) {
-    exitCodeUnimplemented = true;
-    return nullptr;
-  }
-
   // Needed to change to std::unique_ptr<const Config>
   return std::move(cfg);
 }

@@ -7,6 +7,7 @@
         "SendEmptyRecords":"Bogo allows only 32 empty records to be sent before other TLS messages.",
         "SendUserCanceledAlerts-TooMany-TLS13":"Bogo allows only 5 user canceled alerts to be sent.",
         "SendWarningAlerts-TooMany":"Bogo allows only 5 warning alerts to be sent.",
+        "Alternate*TooMany*WarningAlerts":"NSS doesn't cap received warning alerts / empty records; there is no RFC limit.",
         "TooManyKeyUpdates":"Bogo allows only 32 KeyUpdate messages to be sent.",
         "UnsolicitedServerNameAck-TLS*":"Boring wants us to fail with an unexpected_extension alert, we simply ignore ssl_server_name_xtn.",
         "DuplicateCertCompressionExt*":"BoGo expects that an alert is sent if more than one compression algorithm is sent.",
@@ -18,6 +19,7 @@
         "Server-JDK11-NoWorkaround-3":"Unexpected Bogo crash.",
         "Resume-Server-UnofferedCipher-TLS13":"Bogo rejects resumption if client offers previously not used ciphersuites with equal hash algorithm (no 0Rtt).",
         "EarlyData-FirstTicket-Server-TLS13":"Bogo provides specific early data logging which is the only check in this test but not supported by NSS.",
+        "TLS13-Client-*TicketFlags":"NSS doesn't implement the ticket_flags extension and ignores it; RFC 8446 4.2 requires ignoring unrecognized extensions.",
 
         "CheckLeafCurve":"NSS doesn't require ECDSA curve to match ECDH curve",
         "UnsupportedCurve":"NSS doesn't require ECDSA curve to match ECDH curve",
@@ -56,18 +58,30 @@
 
         "Server-Verify*":"Runner doesn't set the appropriate cert-file and key-file arguments",
         "Client-Sign-Negotiate-*":"Runner doesn't set the appropriate cert-file and key-file arguments",
+        "Client-Sign-ECDSA_P*":"NSS uses one signature-scheme list (ss->ssl3.signatureSchemes, ssl3con.c:14252) for both signing and accepting, so BoGo's -signing-prefs also narrows what NSS accepts; the runner's default RSA server cert then can't sign its ServerKeyExchange with the single permitted scheme.",
+        "Client-Sign-ECDSA_SHA1-TLS12":"NSS uses one signature-scheme list (ss->ssl3.signatureSchemes, ssl3con.c:14252) for both signing and accepting, so BoGo's -signing-prefs also narrows what NSS accepts; the runner's default RSA server cert then can't sign its ServerKeyExchange with the single permitted scheme.",
+        "Client-Sign-RSA_PSS_SHA512-*":"NSS uses one signature-scheme list (ss->ssl3.signatureSchemes, ssl3con.c:14252) for both signing and accepting, so BoGo's -signing-prefs also narrows what NSS accepts; the runner's server-signing list omits rsa_pss_rsae_sha512, so it can't sign its ServerKeyExchange with the single permitted scheme.",
+        "Client-Sign-RSA_PKCS1_SHA256_LEGACY-TLS13":"NSS uses one signature-scheme list (ss->ssl3.signatureSchemes, ssl3con.c:14252) for both signing and accepting, so BoGo's -signing-prefs also narrows what NSS accepts; the runner's server-signing list omits the legacy PKCS1 code point, so it can't sign its ServerKeyExchange with the single permitted scheme.",
+        "Client-Sign-RSA_PKCS1_SHA512-TLS12":"NSS uses one signature-scheme list (ss->ssl3.signatureSchemes, ssl3con.c:14252) for both signing and accepting, so BoGo's -signing-prefs also narrows what NSS accepts; the runner's server-signing list omits rsa_pkcs1_sha512, so it can't sign its ServerKeyExchange with the single permitted scheme.",
 
         "NotJustKyberKeyShare":"Boring always sends a pre-quantum share with Xyber768 (if one is configured)",
         "KyberKeyShareIncludedSecond":"Boring sends Xyber768 even if is not the client's first preference",
         "KyberKeyShareIncludedThird":"Boring sends Xyber768 even if is not the client's first preference",
+        "PostQuantumNotEnabledByDefaultInClients":"NSS enables the X25519MLKEM768 post-quantum group by default; this test expects PQ off by default.",
+        "NotJustMLKEMKeyShare-*":"NSS sends only the hybrid MLKEM key share, not an additional classical share (RFC 8446 4.2.8 permits this). Analogous to NotJustKyberKeyShare.",
+        "MLKEMKeyShareIncluded*":"NSS orders/sends MLKEM key shares by its own preference (RFC 8446 4.2.8 permits this). Analogous to KyberKeyShareIncludedSecond/Third.",
 
         "NoCommonSignatureAlgorithms-TLS12-Fallback":"Boring will consider RSA key exchange if a common signature algorithm cannot be found",
 
         "Server-Sign*ML-DSA-*-TLS13":"NSS doesn't support ML-DSA for TLS 1.3.",
+        "Client-Sign*ML-DSA-*-TLS13":"NSS doesn't support ML-DSA for TLS 1.3.",
+        "Client-Verify-ML-DSA-*-TLS13":"NSS doesn't support ML-DSA for TLS 1.3.",
 
         "RejectEmptyCertificateAuthorities-Server-TLS-TLS13":"NSS doesn't reject an empty CertificateAuthorities extension.",
+        "RejectEmptyOCSPResponse-TLS-*":"NSS doesn't reject an empty stapled OCSP response; RFC 6066 8 defines OCSPResponse<1..2^24-1> (min 1 byte).",
         "ExtensionTrailingData-CertificateAuthorities-Server-TLS-TLS13":"NSS doesn't reject trailing data after the CertificateAuthorities extension.",
         "ExtensionTrailingData-ServerName-Server-TLS-TLS*":"NSS doesn't reject trailing data after the ServerName extension.",
+        "ExtensionTrailingData-ServerName-Client-TLS-*":"NSS doesn't reject trailing data after the ServerName extension.",
         "TrustAnchors-EmptyID-ClientHello":"NSS doesn't reject empty TrustAnchor IDs in ClientHello.",
         "ExtensionTrailingData-TrustAnchors-ClientHello-Server-TLS-TLS13":"NSS doesn't reject trailing data after the TrustAnchors extension.",
 
@@ -77,6 +91,12 @@
         "Resume-Server-TLS12-TLS13-TLS":"NSS rejects TLS 1.3 resumption over TLS 1.2 with the wrong alert.",
 
         "ServerCertificateType-Server-RejectsDefaultOnly-*":"NSS doesn't enforce certificate type negotiation restrictions.",
+        "RejectPSSKeyType-*-TLS1":"NSS doesn't enforce the id-RSASSA-PSS key-type restriction (RFC 4055); TLS 1.0/1.1 only.",
+        "RejectPSSKeyType-*-TLS11":"NSS doesn't enforce the id-RSASSA-PSS key-type restriction (RFC 4055); TLS 1.0/1.1 only.",
+        "CertificateCipherMismatch-PSS":"NSS accepts an id-RSASSA-PSS-restricted certificate with a static-RSA key-exchange cipher; RFC 4055 restricts such keys to RSASSA-PSS.",
+        "CheckClientCertificateTypes":"NSS ignores the certificate_types field of the CertificateRequest (parsed then discarded, ssl3con.c:8155), so it doesn't restrict its client cert to the requested types. The field is removed in TLS 1.3.",
+        "ClientHelloPadding":"NSS's ClientHello is >= 512 bytes, so RFC 7685 padding (which only targets the 256-511 byte range, ssl3ext.c:940) doesn't apply; the test assumes a smaller ClientHello.",
+        "UnnecessaryHelloRetryRequest-TLS13":"NSS's default first key share is the hybrid X25519MLKEM768, not bare X25519, so an HRR selecting X25519 is legitimate. NSS does reject an HRR that selects an already-offered group (tls13exthandle.c:419).",
 
         "####################":"####################",
         "### TLS1/11 failures due to unsupported signature algorithms":"",
