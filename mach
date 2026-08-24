@@ -139,7 +139,7 @@ class cfAction(argparse.Action):
 
         files = [os.path.join("/home/worker/nss", x) for x in files]
         docker_image = "clang-format-service:latest"
-        cf_docker_folder = cwd + "/automation/clang-format"
+        cf_docker_folder = cwd + "/taskcluster/docker/clang-format"
 
         # Build the image if necessary.
         if self.filesChanged(cf_docker_folder):
@@ -162,9 +162,14 @@ class cfAction(argparse.Action):
             "run",
             "-v",
             cwd + ":/home/worker/nss:Z",
+            # The image has no USER (run-task needs root in CI), so ask for the
+            # unprivileged one here rather than letting the script su to it.
+            "--user",
+            "worker",
             "--rm",
             "-ti",
             docker_image,
+            "/home/worker/nss/automation/clang-format/run_clang_format.sh",
         ]
         # The clang format script returns 1 if something's to do. We don't
         # care.
