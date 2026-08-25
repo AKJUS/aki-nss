@@ -75,7 +75,7 @@
 
         "Server-Sign*ML-DSA-*-TLS13":"NSS doesn't support ML-DSA for TLS 1.3.",
         "Client-Sign*ML-DSA-*-TLS13":"NSS doesn't support ML-DSA for TLS 1.3.",
-        "Client-Verify-ML-DSA-*-TLS13":"NSS doesn't support ML-DSA for TLS 1.3.",
+        "Client-VerifyDefault-ML-DSA-*-TLS13":"NSS enables ML-DSA as a default signature scheme, Boring does not.",
 
         "RejectEmptyCertificateAuthorities-Server-TLS-TLS13":"NSS doesn't reject an empty CertificateAuthorities extension.",
         "RejectEmptyOCSPResponse-TLS-*":"NSS doesn't reject an empty stapled OCSP response; RFC 6066 8 defines OCSPResponse<1..2^24-1> (min 1 byte).",
