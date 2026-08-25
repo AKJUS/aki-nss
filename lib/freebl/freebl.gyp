@@ -322,9 +322,11 @@
     # so a single mode-agnostic library serves every freebl variant. The freebl
     # wrappers that DO call PORT_/RNG_ (kyber.c, ml_dsa.c) live in the 'pqcwrap'
     # targets, which mirror the FREEBL_NO_DEPEND split of the freebl libs that
-    # link them.
+    # link them. The target is named 'crux' rather than 'libcrux': Firefox's
+    # build system treats a "lib" prefix on a LIBRARY_NAME specially, so a
+    # 'libcrux' target can't be named in USE_LIBS there.
     {
-      'target_name': 'libcrux',
+      'target_name': 'crux',
       'type': 'static_library',
       'sources': [
         'libcrux/combined_core.c',
@@ -377,7 +379,7 @@
       ],
       'dependencies': [
         '<(DEPTH)/exports.gyp:nss_exports',
-        'libcrux',
+        'crux',
       ],
       'include_dirs!': [
         'verified',
@@ -392,7 +394,7 @@
       ],
       'conditions': [
         [ 'OS=="win"', {
-          # See the libcrux target: eurydice_glue.h trips C4146.
+          # See the crux target: eurydice_glue.h trips C4146.
           'msvs_settings': {
             'VCCLCompilerTool': {
               'AdditionalOptions': [ '/wd4146' ],
@@ -410,7 +412,7 @@
       ],
       'dependencies': [
         '<(DEPTH)/exports.gyp:nss_exports',
-        'libcrux',
+        'crux',
       ],
       'include_dirs!': [
         'verified',
@@ -425,7 +427,7 @@
       ],
       'conditions': [
         [ 'OS=="win"', {
-          # See the libcrux target: eurydice_glue.h trips C4146.
+          # See the crux target: eurydice_glue.h trips C4146.
           'msvs_settings': {
             'VCCLCompilerTool': {
               'AdditionalOptions': [ '/wd4146' ],
@@ -453,7 +455,7 @@
         '<(DEPTH)/exports.gyp:nss_exports',
         'hw-acc-crypto-avx',
         'hw-acc-crypto-avx2',
-        'libcrux',
+        'crux',
         'pqcwrap_static',
         'gcm.gyp:gcm'
       ],
@@ -512,7 +514,7 @@
         '<(DEPTH)/exports.gyp:nss_exports',
         'hw-acc-crypto-avx',
         'hw-acc-crypto-avx2',
-        'libcrux',
+        'crux',
         'pqcwrap',
         'gcm.gyp:gcm-nodepend',
       ],
@@ -595,7 +597,7 @@
         '<(DEPTH)/exports.gyp:nss_exports',
         'hw-acc-crypto-avx',
         'hw-acc-crypto-avx2',
-        'libcrux',
+        'crux',
         'pqcwrap',
       ],
     },
@@ -614,7 +616,7 @@
         '<(DEPTH)/exports.gyp:nss_exports',
         'hw-acc-crypto-avx',
         'hw-acc-crypto-avx2',
-        'libcrux',
+        'crux',
         'pqcwrap',
         'gcm.gyp:gcm',
       ],

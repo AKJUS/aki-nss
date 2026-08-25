@@ -16,7 +16,7 @@
 #include "kyber.h"
 /* Vendored libcrux ML-KEM, from the combined ML-KEM + ML-DSA extraction in
  * lib/freebl/libcrux/ (shares its SHA-3/core with ml_dsa.c). Compiled into the
- * 'libcrux' static library; see lib/freebl/libcrux/README.md and the freebl build
+ * 'crux' static library; see lib/freebl/libcrux/README.md and the freebl build
  * files for the isolated include scope. */
 #include "libcrux_mlkem768.h"
 #include "libcrux_mlkem768_portable.h"
