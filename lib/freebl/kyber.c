@@ -162,14 +162,17 @@ static bool
 valid_enc_seed(KyberParams params, const SECItem *seed)
 {
     switch (params) {
+        /* Only the test-mode parameter sets accept caller-supplied
+         * encapsulation randomness; everywhere else it must come from the
+         * RNG. */
         case params_ml_kem512:
         case params_ml_kem768:
+        case params_ml_kem1024:
             return !seed;
         case params_ml_kem512_test_mode:
         case params_ml_kem768_test_mode:
-        case params_ml_kem1024:
         case params_ml_kem1024_test_mode:
-            return !seed || seed->len == KYBER_SHARED_SECRET_BYTES;
+            return !seed || seed->len == KYBER_ENC_COIN_BYTES;
         default:
             return false;
     }

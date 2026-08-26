@@ -158,6 +158,15 @@ TEST_P(KyberSelfTest, InvalidParameterTest) {
                          secret.get());
   EXPECT_EQ(SECSuccess, rv);
 
+  // Only the test-mode parameter sets accept caller-supplied encapsulation
+  // randomness; these are the production sets, so the seed must be refused
+  // rather than silently used in place of the RNG.
+  ScopedSECItem encSeed(
+      SECITEM_AllocItem(nullptr, nullptr, KYBER_ENC_COIN_BYTES));
+  rv = Kyber_Encapsulate(param, encSeed.get(), publicKey.get(),
+                         ciphertext.get(), secret.get());
+  EXPECT_EQ(SECFailure, rv);
+
   rv = Kyber_Decapsulate(params_kyber_invalid, privateKey.get(),
                          ciphertext.get(), secret.get());
   EXPECT_EQ(SECFailure, rv);
