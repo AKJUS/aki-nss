@@ -51,6 +51,8 @@ if [ -z "${CLEANUP}" -o "${CLEANUP}" = "${SCRIPTNAME}" ]; then
     echo "Failed with core:   ${CORE_CNT}"
     ASAN_CNT=$(grep -c "SUMMARY: AddressSanitizer" $LOGFILE 2>/dev/null | sed s/\ *//)
     echo "ASan failures:      ${ASAN_CNT}"
+    UBSAN_CNT=$(grep -c "runtime error:" $LOGFILE 2>/dev/null | sed s/\ *//)
+    echo "UBSan failures:     ${UBSAN_CNT}"
     LINES_CNT=$(grep -c ">Unknown<" ${RESULTS} 2>/dev/null | sed s/\ *//)
     echo "Unknown status:     ${LINES_CNT}"
     if [ ${LINES_CNT} -gt 0 ]; then
@@ -71,7 +73,7 @@ if [ -z "${CLEANUP}" -o "${CLEANUP}" = "${SCRIPTNAME}" ]; then
     html "</BODY></HTML>"
     rm -f ${TEMPFILES} 2>/dev/null
     if [ ${FAILED_CNT} -gt 0 ] || [ ${ASAN_CNT} -gt 0 ] ||
-       ([ ${CORE_CNT} -gt 0 ] && [ -n "${BUILD_OPT}" ] && [ ${BUILD_OPT} -eq 1 ]); then
+       [ ${UBSAN_CNT} -gt 0 ] || [ ${CORE_CNT} -gt 0 ]; then
         exit 1
     fi
 
