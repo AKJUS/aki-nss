@@ -316,3 +316,54 @@ fi
 
 run_scanbuild "$ninja" -C "$target_dir" "${ninja_params[@]}"
 
+# pkg-config metadata, so that programs can link against this dist without
+# hand-written -l and -I flags.
+generate_pkg_config()
+{
+    local obj_dir="$dist_dir/$target"
+    local nss_h="$cwd/lib/nss/nss.h"
+    [ -f "$nss_h" ] || return 0
+
+    local vmajor vminor vpatch nspr_version
+    vmajor=$(sed -n 's/^#define NSS_VMAJOR \([0-9]*\).*/\1/p' "$nss_h")
+    vminor=$(sed -n 's/^#define NSS_VMINOR \([0-9]*\).*/\1/p' "$nss_h")
+    vpatch=$(sed -n 's/^#define NSS_VPATCH \([0-9]*\).*/\1/p' "$nss_h")
+    [ -n "$vmajor" ] || return 0
+
+    nspr_version=$(sed -n 's/^Version: *//p' \
+        "$obj_dir/lib/pkgconfig/nspr.pc" 2>/dev/null)
+    : "${nspr_version:=4.32}"
+
+    mkdir -p "$obj_dir/lib/pkgconfig"
+    sed -e "s|%prefix%|$obj_dir|g" \
+        -e "s|%exec_prefix%|\${prefix}|g" \
+        -e "s|%libdir%|\${exec_prefix}/lib|g" \
+        -e "s|%includedir%|$dist_dir/public/nss|g" \
+        -e "s|%NSS_VERSION%|$vmajor.$vminor.$vpatch|g" \
+        -e "s|%NSPR_VERSION%|$nspr_version|g" \
+        "$cwd/pkg/pkg-config/nss.pc.in" > "$obj_dir/lib/pkgconfig/nss.pc"
+
+    # The template resolves exec_prefix/libdir/includedir through pkg-config,
+    # which cannot see an uninstalled dist tree. Seed them from the dist layout
+    # instead; the command line flags still override, as they are parsed later.
+    mkdir -p "$obj_dir/bin"
+    sed -e "s|@prefix@|$obj_dir|g" \
+        -e "s|@MOD_MAJOR_VERSION@|$vmajor|g" \
+        -e "s|@MOD_MINOR_VERSION@|$vminor|g" \
+        -e "s|@MOD_PATCH_VERSION@|$vpatch|g" \
+        "$cwd/pkg/pkg-config/nss-config.in" \
+    | awk -v inc="$dist_dir/public/nss" '
+        /^prefix=/ && !done {
+            print
+            print "exec_prefix=${prefix}"
+            print "libdir=${prefix}/lib"
+            print "includedir=" inc
+            done = 1
+            next
+        }
+        { print }
+      ' > "$obj_dir/bin/nss-config"
+    chmod +x "$obj_dir/bin/nss-config"
+}
+
+generate_pkg_config
