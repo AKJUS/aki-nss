@@ -14,6 +14,22 @@ set -e
 
 cwd=$(cd $(dirname $0); pwd -P)
 dist_dir="$cwd/../dist"
+
+# --dist has to be resolved before the main argument loop, because --rebuild
+# reads the saved argument list from inside the dist directory.
+dist_flag_pending=0
+for arg in "$@"; do
+    if [ "$dist_flag_pending" = 1 ]; then
+        dist_dir="$arg"
+        dist_flag_pending=0
+        continue
+    fi
+    case "$arg" in
+        --dist=?*) dist_dir="${arg#*=}" ;;
+        --dist) dist_flag_pending=1 ;;
+    esac
+done
+
 argsfile="$dist_dir/build_args"
 source "$cwd/coreconf/nspr.sh"
 source "$cwd/coreconf/sanitizers.sh"
@@ -122,6 +138,8 @@ while [ $# -gt 0 ]; do
         --nspr-test-build) build_nspr_tests=1 ;;
         --nspr-test-run) run_nspr_tests=1 ;;
         --nspr-only) exit_after_nspr=1 ;;
+        --dist=?*) ;; # resolved before this loop
+        --dist) shift ;; # resolved before this loop
         --with-nspr=?*) set_nspr_path "${1#*=}"; no_local_nspr=1 ;;
         --system-nspr) set_nspr_path "/usr/include/nspr/:"; no_local_nspr=1 ;;
         --system-sqlite) gyp_params+=(-Duse_system_sqlite=1) ;;
@@ -297,3 +315,4 @@ else
 fi
 
 run_scanbuild "$ninja" -C "$target_dir" "${ninja_params[@]}"
+
