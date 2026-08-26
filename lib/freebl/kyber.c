@@ -12,7 +12,6 @@
 #include "secerr.h"
 #include "secitem.h"
 
-#include "kyber-pqcrystals-ref.h"
 #include "kyber.h"
 /* Vendored libcrux ML-KEM, from the combined ML-KEM + ML-DSA extraction in
  * lib/freebl/libcrux/ (shares its SHA-3/core with ml_dsa.c). Compiled into the
@@ -22,14 +21,6 @@
 #include "libcrux_mlkem768_portable.h"
 #include "libcrux_mlkem1024.h"
 #include "libcrux_mlkem1024_portable.h"
-
-/* Consistency check between kyber-pqcrystals-ref.h and kyber.h */
-PR_STATIC_ASSERT(KYBER768_PUBLIC_KEY_BYTES == pqcrystals_kyber768_PUBLICKEYBYTES);
-PR_STATIC_ASSERT(KYBER768_PRIVATE_KEY_BYTES == pqcrystals_kyber768_SECRETKEYBYTES);
-PR_STATIC_ASSERT(KYBER768_CIPHERTEXT_BYTES == pqcrystals_kyber768_CIPHERTEXTBYTES);
-PR_STATIC_ASSERT(KYBER_SHARED_SECRET_BYTES == pqcrystals_kyber768_BYTES);
-PR_STATIC_ASSERT(KYBER_KEYPAIR_COIN_BYTES == pqcrystals_kyber768_KEYPAIRCOINBYTES);
-PR_STATIC_ASSERT(KYBER_ENC_COIN_BYTES == pqcrystals_kyber768_ENCCOINBYTES);
 
 /* Local names for the libcrux entry point types that eurydice does not give a
  * stable name to: the trailing hash on Eurydice_arr_* and tuple_* is
@@ -62,10 +53,6 @@ static bool
 valid_params(KyberParams params)
 {
     switch (params) {
-#ifndef NSS_DISABLE_KYBER
-        case params_kyber768_round3:
-        case params_kyber768_round3_test_mode:
-#endif
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
         case params_ml_kem1024:
@@ -80,8 +67,6 @@ static bool
 valid_pubkey(KyberParams params, const SECItem *pubkey)
 {
     switch (params) {
-        case params_kyber768_round3:
-        case params_kyber768_round3_test_mode:
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
             return pubkey && pubkey->len == KYBER768_PUBLIC_KEY_BYTES;
@@ -97,8 +82,6 @@ static bool
 valid_privkey(KyberParams params, const SECItem *privkey)
 {
     switch (params) {
-        case params_kyber768_round3:
-        case params_kyber768_round3_test_mode:
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
             return privkey && privkey->len == KYBER768_PRIVATE_KEY_BYTES;
@@ -114,8 +97,6 @@ static bool
 valid_ciphertext(KyberParams params, const SECItem *ciphertext)
 {
     switch (params) {
-        case params_kyber768_round3:
-        case params_kyber768_round3_test_mode:
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
             return ciphertext && ciphertext->len == KYBER768_CIPHERTEXT_BYTES;
@@ -131,8 +112,6 @@ static bool
 valid_secret(KyberParams params, const SECItem *secret)
 {
     switch (params) {
-        case params_kyber768_round3:
-        case params_kyber768_round3_test_mode:
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
         case params_ml_kem1024:
@@ -147,8 +126,6 @@ static bool
 valid_keypair_seed(KyberParams params, const SECItem *seed)
 {
     switch (params) {
-        case params_kyber768_round3:
-        case params_kyber768_round3_test_mode:
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
         case params_ml_kem1024:
@@ -163,10 +140,8 @@ static bool
 valid_enc_seed(KyberParams params, const SECItem *seed)
 {
     switch (params) {
-        case params_kyber768_round3:
         case params_ml_kem768:
             return !seed;
-        case params_kyber768_round3_test_mode:
         case params_ml_kem768_test_mode:
         case params_ml_kem1024:
         case params_ml_kem1024_test_mode:
@@ -213,16 +188,9 @@ Kyber_NewKey(KyberParams params, const SECItem *keypair_seed, SECItem *privkey, 
         libcrux_ml_kem_mlkem1024_MlKem1024KeyPair keys = libcrux_ml_kem_mlkem1024_portable_generate_key_pair(coinsArr);
         memcpy(pubkey->data, keys.pk.data, MLKEM1024_PUBLIC_KEY_BYTES);
         memcpy(privkey->data, keys.sk.data, MLKEM1024_PRIVATE_KEY_BYTES);
-    } else if (params == params_kyber768_round3 || params == params_kyber768_round3_test_mode) {
-#ifdef NSS_DISABLE_KYBER
-        PORT_SetError(SEC_ERROR_INVALID_ALGORITHM);
-        return SECFailure;
-#else
-        pqcrystals_kyber768_ref_keypair_derand(pubkey->data, privkey->data, coins);
-#endif
     } else {
-        /* unreachable */
-        PORT_SetError(SEC_ERROR_LIBRARY_FAILURE);
+        /* round-3 Kyber removed; only ML-KEM is supported */
+        PORT_SetError(SEC_ERROR_INVALID_ALGORITHM);
         return SECFailure;
     }
     NSS_DECLASSIFY(pubkey->data, pubkey->len);
@@ -284,16 +252,9 @@ Kyber_Encapsulate(KyberParams params, const SECItem *enc_seed, const SECItem *pu
         MlKem1024Encapsulation encap = libcrux_ml_kem_mlkem1024_portable_encapsulate(&pk_value, coinsArr);
         memcpy(ciphertext->data, encap.fst.data, MLKEM1024_CIPHERTEXT_BYTES);
         memcpy(secret->data, encap.snd.data, KYBER_SHARED_SECRET_BYTES);
-    } else if (params == params_kyber768_round3 || params == params_kyber768_round3_test_mode) {
-#ifdef NSS_DISABLE_KYBER
-        PORT_SetError(SEC_ERROR_INVALID_ALGORITHM);
-        return SECFailure;
-#else
-        pqcrystals_kyber768_ref_enc_derand(ciphertext->data, secret->data, pubkey->data, coins);
-#endif
     } else {
-        /* unreachable */
-        PORT_SetError(SEC_ERROR_LIBRARY_FAILURE);
+        /* round-3 Kyber removed; only ML-KEM is supported */
+        PORT_SetError(SEC_ERROR_INVALID_ALGORITHM);
         return SECFailure;
     }
 
@@ -343,16 +304,9 @@ Kyber_Decapsulate(KyberParams params, const SECItem *privkey, const SECItem *cip
 
         MlKemSharedSecret ss = libcrux_ml_kem_mlkem1024_portable_decapsulate(&private_key, &cipher_text);
         memcpy(secret->data, ss.data, KYBER_SHARED_SECRET_BYTES);
-    } else if (params == params_kyber768_round3 || params == params_kyber768_round3_test_mode) {
-#ifdef NSS_DISABLE_KYBER
-        PORT_SetError(SEC_ERROR_INVALID_ALGORITHM);
-        return SECFailure;
-#else
-        pqcrystals_kyber768_ref_dec(secret->data, ciphertext->data, privkey->data);
-#endif
     } else {
-        // unreachable
-        PORT_SetError(SEC_ERROR_LIBRARY_FAILURE);
+        /* round-3 Kyber removed; only ML-KEM is supported */
+        PORT_SetError(SEC_ERROR_INVALID_ALGORITHM);
         return SECFailure;
     }
 

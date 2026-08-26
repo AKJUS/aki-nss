@@ -636,10 +636,6 @@ ifndef NSS_DISABLE_CHACHAPOLY
     VERIFIED_SRCS += Hacl_Poly1305_32.c Hacl_Chacha20.c Hacl_Chacha20Poly1305_32.c
 endif # NSS_DISABLE_CHACHAPOLY
 
-ifndef NSS_DISABLE_KYBER
-KYBER_PQCRYSTALS = kyber-pqcrystals-ref.c
-endif
-
 VERIFIED_SRCS += Hacl_Hash_SHA3.c Hacl_P256.c Hacl_P384.c Hacl_P521.c
 VERIFIED_SRCS += Hacl_Ed25519.c
 VERIFIED_SRCS += Hacl_Curve25519_51.c

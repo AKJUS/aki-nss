@@ -36,12 +36,6 @@ struct KemTestParams {
 };
 
 static const KemTestParams kKemTestParams[] = {
-#ifndef NSS_DISABLE_KYBER
-    // Round 3 Kyber has no ML-KEM OID and no seckey_KyberParamsToLen arm, so
-    // cryptohi cannot size it; both strengths come back 0.
-    {CKM_NSS_KYBER_KEY_PAIR_GEN, CKM_NSS_KYBER, CKP_NSS_KYBER_768_ROUND3,
-     "Kyber768Round3", 0, 0},
-#endif
     // The vendor mechanism with its matching vendor parameter set. Both
     // spellings of ML-KEM-768 have to survive a generate/export/import round
     // trip; pk11wrap normalises the vendor one to CKP_ML_KEM_768 on the way
@@ -309,7 +303,6 @@ class Pkcs11MlKemStorageTest
   static unsigned int ExpectedPublicKeyLen(
       CK_ML_KEM_PARAMETER_SET_TYPE paramSet) {
     switch (paramSet) {
-      case CKP_NSS_KYBER_768_ROUND3:
       case CKP_NSS_ML_KEM_768:
       case CKP_ML_KEM_768:
         return KYBER768_PUBLIC_KEY_BYTES;

@@ -680,11 +680,7 @@ static const struct mechanismList mechanisms[] = {
     { CKM_NSS_IKE_PRF_DERIVE, { 8, 64, CKF_DERIVE }, PR_TRUE },
     { CKM_NSS_IKE1_PRF_DERIVE, { 8, 64, CKF_DERIVE }, PR_TRUE },
     { CKM_NSS_IKE1_APP_B_PRF_DERIVE, { 8, 255 * 64, CKF_DERIVE }, PR_TRUE },
-/* -------------------- Kyber Operations ----------------------- */
-#ifndef NSS_DISABLE_KYBER
-    { CKM_NSS_KYBER_KEY_PAIR_GEN, { 0, 0, CKF_GENERATE_KEY_PAIR }, PR_TRUE },
-    { CKM_NSS_KYBER, { 0, 0, CKF_KEM }, PR_TRUE },
-#endif
+    /* -------------------- Kyber Operations ----------------------- */
     { CKM_NSS_ML_KEM_KEY_PAIR_GEN, { 0, 0, CKF_GENERATE_KEY_PAIR }, PR_TRUE },
     { CKM_NSS_ML_KEM, { 0, 0, CKF_KEM }, PR_TRUE },
     { CKM_ML_KEM_KEY_PAIR_GEN, { 0, 0, CKF_GENERATE_KEY_PAIR }, PR_TRUE },
@@ -1184,9 +1180,6 @@ sftk_handlePublicKeyObject(SFTKSession *session, SFTKObject *object,
             derive = (key_type == CKK_EC_EDWARDS) ? CK_FALSE : CK_TRUE;    /* CK_TRUE for ECDH */
             verify = (key_type == CKK_EC_MONTGOMERY) ? CK_FALSE : CK_TRUE; /* for ECDSA and EDDSA */
             break;
-#ifndef NSS_DISABLE_KYBER
-        case CKK_NSS_KYBER:
-#endif
         case CKK_NSS_ML_KEM:
         case CKK_ML_KEM:
             if (!sftk_hasAttribute(object, CKA_PARAMETER_SET)) {
@@ -1421,9 +1414,6 @@ sftk_handlePrivateKeyObject(SFTKSession *session, SFTKObject *object, CK_KEY_TYP
             derive = CK_TRUE;
             createObjectInfo = PR_FALSE;
             break;
-#ifndef NSS_DISABLE_KYBER
-        case CKK_NSS_KYBER:
-#endif
         case CKK_NSS_ML_KEM:
         case CKK_ML_KEM:
             if (!sftk_hasAttribute(object, CKA_KEY_TYPE)) {
@@ -2318,9 +2308,6 @@ sftk_GetPubKey(SFTKObject *object, CK_KEY_TYPE key_type,
                 crv = CKR_ATTRIBUTE_VALUE_INVALID;
             }
             break;
-#ifndef NSS_DISABLE_KYBER
-        case CKK_NSS_KYBER:
-#endif
         case CKK_NSS_ML_KEM:
         case CKK_ML_KEM:
             pubKey->keyType = NSSLOWKEYMLKEMKey;
@@ -2528,9 +2515,6 @@ sftk_mkPrivKey(SFTKObject *object, CK_KEY_TYPE key_type, CK_RV *crvp)
             }
             break;
 
-#ifndef NSS_DISABLE_KYBER
-        case CKK_NSS_KYBER:
-#endif
         case CKK_NSS_ML_KEM:
         case CKK_ML_KEM:
             privKey->keyType = NSSLOWKEYMLKEMKey;

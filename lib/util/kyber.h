@@ -29,15 +29,11 @@ typedef enum {
     params_kyber_invalid,
 
     /*
-     * The Kyber768 parameters specified in version 3.02 of the NIST submission
-     * https://pq-crystals.org/kyber/data/kyber-specification-round3-20210804.pdf
+     * Deprecated: round-3 Kyber (pqcrystals) has been removed. These two
+     * enumerators are retained as reserved slots so the ML-KEM values below keep
+     * their ABI ordinals; they are no longer supported and are rejected.
      */
     params_kyber768_round3,
-
-    /*
-     * Identical to params_kyber768_round3 except that this parameter set allows
-     * the use of a seed in `Kyber_Encapsulate` for testing.
-     */
     params_kyber768_round3_test_mode,
 
     /*
