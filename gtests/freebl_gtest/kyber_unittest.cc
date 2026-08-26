@@ -19,6 +19,10 @@ namespace nss_test {
 size_t get_ciphertext_length(KyberParams param) {
   size_t len = 0;
   switch (param) {
+    case params_ml_kem512:
+    case params_ml_kem512_test_mode:
+      len = MLKEM512_CIPHERTEXT_BYTES;
+      break;
     case params_ml_kem768:
     case params_ml_kem768_test_mode:
       len = KYBER768_CIPHERTEXT_BYTES;
@@ -29,7 +33,6 @@ size_t get_ciphertext_length(KyberParams param) {
       break;
     case params_kyber768_round3:
     case params_kyber768_round3_test_mode:
-    case params_ml_kem512:
     case params_kyber_invalid:
       break;
   }
@@ -39,6 +42,10 @@ size_t get_ciphertext_length(KyberParams param) {
 size_t get_private_key_length(KyberParams param) {
   size_t len = 0;
   switch (param) {
+    case params_ml_kem512:
+    case params_ml_kem512_test_mode:
+      len = MLKEM512_PRIVATE_KEY_BYTES;
+      break;
     case params_ml_kem768:
     case params_ml_kem768_test_mode:
       len = KYBER768_PRIVATE_KEY_BYTES;
@@ -49,7 +56,6 @@ size_t get_private_key_length(KyberParams param) {
       break;
     case params_kyber768_round3:
     case params_kyber768_round3_test_mode:
-    case params_ml_kem512:
     case params_kyber_invalid:
       break;
   }
@@ -59,6 +65,10 @@ size_t get_private_key_length(KyberParams param) {
 size_t get_public_key_length(KyberParams param) {
   size_t len = 0;
   switch (param) {
+    case params_ml_kem512:
+    case params_ml_kem512_test_mode:
+      len = MLKEM512_PUBLIC_KEY_BYTES;
+      break;
     case params_ml_kem768:
     case params_ml_kem768_test_mode:
       len = KYBER768_PUBLIC_KEY_BYTES;
@@ -69,7 +79,6 @@ size_t get_public_key_length(KyberParams param) {
       break;
     case params_kyber768_round3:
     case params_kyber768_round3_test_mode:
-    case params_ml_kem512:
     case params_kyber_invalid:
       break;
   }
@@ -379,7 +388,7 @@ TEST_P(KyberSelfTest, DecapsulationWithModifiedRejectionKeyTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(SelfTests, KyberSelfTest,
-                         ::testing::Values(params_ml_kem768,
+                         ::testing::Values(params_ml_kem512, params_ml_kem768,
                                            params_ml_kem1024));
 
 TEST(MlKemKeyGen, KnownAnswersTest) {
@@ -632,6 +641,9 @@ class MlKemWycheproofTest : public ::testing::Test {
 
   std::string ParameterSetName() {
     switch (params_) {
+      case params_ml_kem512:
+      case params_ml_kem512_test_mode:
+        return "ML-KEM-512";
       case params_ml_kem768:
       case params_ml_kem768_test_mode:
         return "ML-KEM-768";
@@ -669,6 +681,8 @@ class MlKemWycheproofTest : public ::testing::Test {
         [this](const MlKemTestVector& t) { Decaps(t); });                    \
   }
 
+ML_KEM_WYCHEPROOF_TESTS(MlKem512, 512, params_ml_kem512,
+                        params_ml_kem512_test_mode)
 ML_KEM_WYCHEPROOF_TESTS(MlKem768, 768, params_ml_kem768,
                         params_ml_kem768_test_mode)
 ML_KEM_WYCHEPROOF_TESTS(MlKem1024, 1024, params_ml_kem1024,

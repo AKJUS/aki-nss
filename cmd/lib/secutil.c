@@ -1543,6 +1543,13 @@ SECU_PrintMLKEMPublicKey(FILE *out, SECKEYPublicKey *pk, char *m, int level)
     fprintf(out, "%s:\n", m);
 
     switch (pk->u.kyber.params) {
+        case params_ml_kem512:
+            SECU_PrintOidTag(out, SEC_OID_ML_KEM_512, "Parameter Set", level + 1);
+            break;
+        case params_ml_kem512_test_mode:
+            SECU_PrintOidTag(out, SEC_OID_ML_KEM_512, "Parameter Set (test mode)",
+                             level + 1);
+            break;
         case params_ml_kem768:
             SECU_PrintOidTag(out, SEC_OID_ML_KEM_768, "Parameter Set", level + 1);
             break;
@@ -1556,9 +1563,6 @@ SECU_PrintMLKEMPublicKey(FILE *out, SECKEYPublicKey *pk, char *m, int level)
         case params_ml_kem1024_test_mode:
             SECU_PrintOidTag(out, SEC_OID_ML_KEM_1024, "Parameter Set (test mode)",
                              level + 1);
-            break;
-        case params_ml_kem512:
-            SECU_PrintOidTag(out, SEC_OID_ML_KEM_512, "Parameter Set", level + 1);
             break;
         case params_kyber_invalid:
             SECU_Indent(out, level);

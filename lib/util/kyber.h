@@ -60,9 +60,21 @@ typedef enum {
      */
     params_ml_kem1024_test_mode,
 
-    /* not used by softoken/freebl. Used in NSS proper to handle kem 512 keys
-     * mechanically. Still need a separate module to actually use the keys */
+    /*
+     * The ML-KEM parameters specified in FIPS 203.
+     * https://csrc.nist.gov/pubs/fips/203/final
+     *
+     * Kept last so the enumerators above retain their ABI ordinals: this one
+     * predates softoken/freebl support for ML-KEM-512, where it only served to
+     * let NSS proper handle 512 keys mechanically.
+     */
     params_ml_kem512,
+
+    /*
+     * Identical to params_ml_kem512 except that this parameter set allows
+     * the use of a seed in `Kyber_Encapsulate` for testing.
+     */
+    params_ml_kem512_test_mode,
 
 } KyberParams;
 

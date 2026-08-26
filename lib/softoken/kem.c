@@ -18,6 +18,9 @@ CK_ML_KEM_PARAMETER_SET_TYPE
 sftk_kyber_InternalToPK11Param(KyberParams params)
 {
     switch (params) {
+        case params_ml_kem512:
+        case params_ml_kem512_test_mode:
+            return CKP_ML_KEM_512;
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
             return CKP_ML_KEM_768;
@@ -32,6 +35,8 @@ KyberParams
 sftk_kyber_PK11ParamToInternal(CK_ML_KEM_PARAMETER_SET_TYPE pk11ParamSet)
 {
     switch (pk11ParamSet) {
+        case CKP_ML_KEM_512:
+            return params_ml_kem512;
         case CKP_NSS_ML_KEM_768:
         case CKP_ML_KEM_768:
             return params_ml_kem768;
@@ -46,6 +51,9 @@ size_t
 sftk_kyber_pubKeyLen(KyberParams params)
 {
     switch (params) {
+        case params_ml_kem512:
+        case params_ml_kem512_test_mode:
+            return MLKEM512_PUBLIC_KEY_BYTES;
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
             return KYBER768_PUBLIC_KEY_BYTES;
@@ -71,6 +79,9 @@ SECItem *
 sftk_kyber_AllocPrivKeyItem(KyberParams params, SECItem *privkey)
 {
     switch (params) {
+        case params_ml_kem512:
+        case params_ml_kem512_test_mode:
+            return SECITEM_AllocItem(NULL, privkey, MLKEM512_PRIVATE_KEY_BYTES);
         case params_ml_kem768:
         case params_ml_kem768_test_mode:
             return SECITEM_AllocItem(NULL, privkey, KYBER768_PRIVATE_KEY_BYTES);
@@ -149,6 +160,8 @@ sftk_kem_CiphertextLen(CK_MECHANISM_PTR pMechanism, CK_ULONG paramSet)
         case CKM_NSS_ML_KEM:
         case CKM_ML_KEM:
             switch (paramSet) {
+                case CKP_ML_KEM_512:
+                    return MLKEM512_CIPHERTEXT_BYTES;
                 case CKP_NSS_ML_KEM_768:
                 case CKP_ML_KEM_768:
                     return KYBER768_CIPHERTEXT_BYTES;

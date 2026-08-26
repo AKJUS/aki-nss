@@ -646,7 +646,8 @@ VERIFIED_SRCS += Hacl_Curve25519_51.c
 # extraction in verified/.
 LIBCRUX_SRCS = combined_core.c libcrux_ct_ops.c libcrux_sha3_portable.c \
                libcrux_mlkem_core.c libcrux_mlkem_portable.c \
-               libcrux_mlkem768_portable.c libcrux_mlkem1024_portable.c \
+               libcrux_mlkem512_portable.c libcrux_mlkem768_portable.c \
+               libcrux_mlkem1024_portable.c \
                libcrux_mldsa_core.c libcrux_mldsa_portable.c \
                libcrux_mldsa44_portable.c libcrux_mldsa65_portable.c \
                libcrux_mldsa87_portable.c
