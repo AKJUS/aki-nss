@@ -11961,7 +11961,8 @@ ssl_SetAuthKeyBits(sslSocket *ss, const SECKEYPublicKey *pubKey)
             break;
 
         default:
-            FATAL_ERROR(ss, SEC_ERROR_LIBRARY_FAILURE, internal_error);
+            FATAL_ERROR(ss, SSL_ERROR_UNSUPPORTED_CERTIFICATE_TYPE,
+                        unsupported_certificate);
             return SECFailure;
     }
 
