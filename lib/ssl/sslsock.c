@@ -4620,8 +4620,7 @@ SSLExp_SetResumptionToken(PRFileDesc *fd, const PRUint8 *token,
 
     // We override any previously set session.
     if (ss->sec.ci.sid) {
-        ssl_FreeSID(ss->sec.ci.sid);
-        ss->sec.ci.sid = NULL;
+        ssl_SetSocketSID(ss, NULL);
     }
 
     PRINT_BUF(50, (ss, "incoming resumption token", token, len));
@@ -4656,7 +4655,7 @@ SSLExp_SetResumptionToken(PRFileDesc *fd, const PRUint8 *token,
     sid->cached = in_external_cache;
     sid->lastAccessTime = ssl_Time(ss);
 
-    ss->sec.ci.sid = sid;
+    ssl_SetSocketSID(ss, sid);
 
     ssl_ReleaseSSL3HandshakeLock(ss);
     ssl_Release1stHandshakeLock(ss);

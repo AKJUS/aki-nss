@@ -713,8 +713,7 @@ tls13_SetupClientHello(sslSocket *ss, sslClientHelloType chType)
                 FATAL_ERROR(ss, SEC_ERROR_LIBRARY_FAILURE, internal_error);
                 SSL_AtomicIncrementLong(&ssl3stats->sch_sid_cache_not_ok);
                 ssl_UncacheSessionID(ss);
-                ssl_FreeSID(ss->sec.ci.sid);
-                ss->sec.ci.sid = NULL;
+                ssl_SetSocketSID(ss, NULL);
                 return SECFailure;
             }
 
@@ -2647,7 +2646,7 @@ tls13_HandleClientHelloPart2(sslSocket *ss,
         }
     }
     /* Take ownership of the session. */
-    ss->sec.ci.sid = sid;
+    ssl_SetSocketSID(ss, sid);
     sid = NULL;
 
     if (ss->ssl3.hs.zeroRttState == ssl_0rtt_accepted) {
@@ -3687,8 +3686,8 @@ tls13_HandleServerHelloPart2(sslSocket *ss, const PRUint8 *savedMsg, PRUint32 sa
     /* Discard current SID and make a new one, though it may eventually
      * end up looking a lot like the old one.
      */
-    ssl_FreeSID(sid);
-    ss->sec.ci.sid = sid = ssl3_NewSessionID(ss, PR_FALSE);
+    sid = ssl3_NewSessionID(ss, PR_FALSE);
+    ssl_SetSocketSID(ss, sid); /* releases the old sid */
     if (sid == NULL) {
         FATAL_ERROR(ss, PORT_GetError(), internal_error);
         return SECFailure;
@@ -6573,8 +6572,7 @@ tls13_HandleNewSessionTicket(sslSocket *ss, PRUint8 *b, PRUint32 length)
 
             /* Destroy the old SID. */
             ssl_UncacheSessionID(ss);
-            ssl_FreeSID(ss->sec.ci.sid);
-            ss->sec.ci.sid = sid;
+            ssl_SetSocketSID(ss, sid);
         }
 
         ssl3_SetSIDSessionTicket(ss->sec.ci.sid, &ticket);
